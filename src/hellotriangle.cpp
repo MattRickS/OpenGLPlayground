@@ -102,17 +102,19 @@ int main()
 
     // Prepare Objects
     float vertices[] = {
-         0.5f,  0.5f, 0.0f,
+         0.5f,  0.4f, 0.0f,
          0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
+        -0.4f, -0.5f, 0.0f,
+        -0.5f, -0.4f, 0.0f,
         -0.5f,  0.5f, 0.0f,
+         0.4f,  0.5f, 0.0f,
     };
     unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3,
+        0, 1, 2,
+        3, 4, 5,
     };
     size_t attrSizes[] = {3};
-    GLuint VAO = LoadVAO(vertices, 4, indices, 6, attrSizes, 1);
+    GLuint VAO = LoadVAO(vertices, 6, indices, 6, attrSizes, 1);
 
     // Render loop
     while (!glfwWindowShouldClose(window))
