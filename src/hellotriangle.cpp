@@ -95,9 +95,13 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Shaders
-    Shader simpleShader = Shader(
+    Shader orangeShader = Shader(
         "src/shaders/SimpleVertexShader.glsl",
         "src/shaders/SimpleFragmentShader.glsl"
+    );
+    Shader yellowShader = Shader(
+        "src/shaders/SimpleVertexShader.glsl",
+        "src/shaders/SimpleFragmentShaderYellow.glsl"
     );
 
     // Prepare Objects
@@ -134,9 +138,10 @@ int main()
 
         // Rendering
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
-        simpleShader.use();
+        orangeShader.use();
         glBindVertexArray(VAO_1);
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        yellowShader.use();
         glBindVertexArray(VAO_2);
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);  // Unbinding
