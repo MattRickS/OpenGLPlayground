@@ -87,20 +87,37 @@ void Shader::use()
 }
 
 // Utility uniform functions
-void Shader::setBool(const std::string& name, bool value) const
+GLuint Shader::getLocation(const std::string& name) const
 {
 	GLuint location = glGetUniformLocation(ID, name.c_str());
+	if (location == -1)
+	{
+		std::cout << "Shader uniform not found: " << name << std::endl;
+	}
+	return location;
+}
+
+
+void Shader::setBool(const std::string& name, bool value) const
+{
+	GLuint location = getLocation(name);
 	glUniform1i(location, (int)value);
 }
 
 void Shader::setInt(const std::string& name, int value) const
 {
-	GLuint location = glGetUniformLocation(ID, name.c_str());
+	GLuint location = getLocation(name);
 	glUniform1i(location, value);
 }
 
 void Shader::setFloat(const std::string& name, float value) const
 {
-	GLuint location = glGetUniformLocation(ID, name.c_str());
+	GLuint location = getLocation(name);
 	glUniform1f(location, value);
+}
+
+void Shader::setFloat4(const std::string& name, float x, float y, float z, float w) const
+{
+	GLuint location = getLocation(name);
+	glUniform4f(location, x, y, z, w);
 }
