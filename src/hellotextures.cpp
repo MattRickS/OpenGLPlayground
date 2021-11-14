@@ -1,5 +1,3 @@
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -7,6 +5,7 @@
 #include <math.h>
 
 #include "Shader.h"
+#include "Texture.hpp"
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -63,30 +62,6 @@ GLuint LoadVAO(
 	return VAO;
 }
 
-GLuint LoadImage(const char* path, GLenum format)
-{
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// Load data into the texture
-	int width, height, numChannels;
-	unsigned char* data = stbi_load(path, &width, &height, &numChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Faile to load texture: " << path << std::endl;
-	}
-	
-	// Cleanup
-	stbi_image_free(data);
-
-	return texture;
-}
 
 int main()
 {
@@ -124,20 +99,8 @@ int main()
 
     // Textures
     stbi_set_flip_vertically_on_load(true);
-    GLuint textureID1 = LoadImage("src/textures/woodenContainer.jpg", GL_RGB);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    GLuint textureID2 = LoadImage("src/textures/awesomeface.png", GL_RGBA);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    Texture texture1 = Texture("src/textures/woodenContainer.jpg", GL_RGB);
+    Texture texture2 = Texture("src/textures/awesomeface.png", GL_RGBA);
 
     // Shaders
     Shader shader = Shader(
@@ -175,10 +138,8 @@ int main()
 
         // Rendering
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureID1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, textureID2);
+        texture1.activate(GL_TEXTURE0);
+        texture2.activate(GL_TEXTURE1);
         shader.use();
 
         glBindVertexArray(VAO);
