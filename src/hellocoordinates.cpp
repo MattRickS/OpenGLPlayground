@@ -11,6 +11,16 @@
 
 #include "Shader.h"
 #include "Texture.hpp"
+#include "Camera.hpp"
+
+
+int windowWidth = 800;
+int windowHeight = 600;
+
+bool firstMouse = true;
+float lastMouseX, lastMouseY;
+float deltaTime, lastFrame = 0.0f;
+Camera mainCamera = Camera();
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -18,11 +28,46 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastMouseX = xpos;
+        lastMouseX = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastMouseX;
+    float yoffset = lastMouseY - ypos; // reversed since y-coordinates range from bottom to top
+    lastMouseX = xpos;
+    lastMouseY = ypos;
+
+    mainCamera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    mainCamera.ProcessMouseScroll(yoffset);
+}
+
 
 void processInput(GLFWwindow *window)
 {
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        mainCamera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        mainCamera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        mainCamera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        mainCamera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
 }
 
 GLuint LoadVAO(
@@ -79,11 +124,8 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    int width = 800;
-    int height = 600;
-
     // Initialize the GLFW window
-    GLFWwindow* window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -101,6 +143,8 @@ int main()
 
     // Register callbacks
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // Textures
     stbi_set_flip_vertically_on_load(true);
@@ -166,17 +210,11 @@ int main()
     };
 
     // Matrices
-    glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
     glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 100.0f);
-
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
 
     // Options
     glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -192,6 +230,10 @@ int main()
         texture1.activate(GL_TEXTURE0);
         texture2.activate(GL_TEXTURE1);
         shader.use();
+
+        shader.setMat4("view", mainCamera.GetViewMatrix());
+        projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
+        shader.setMat4("projection", projection);
 
         glBindVertexArray(VAO);
         for (int i = 0; i < 10; i++)
