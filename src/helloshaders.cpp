@@ -97,21 +97,22 @@ int main()
 
     // Shaders
     Shader shader = Shader(
-        "src/shaders/SimpleVertexShader.glsl",
+        "src/shaders/ColorVertexShader.glsl",
         "src/shaders/ColorFragmentShader.glsl"
     );
 
     // Prepare Objects
-    float vertices_1[] = {
-         0.5f,  0.4f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-        -0.4f, -0.5f, 0.0f,
+    float vertices[] = {
+         // positions         // colors
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   // top 
     };
-    unsigned int indices_1[] = {
+    unsigned int indices[] = {
         0, 1, 2,
     };
-    size_t attrSizes_1[] = {3};
-    GLuint VAO_1 = LoadVAO(vertices_1, 6, indices_1, 6, attrSizes_1, 1);
+    size_t attrSizes[] = {3, 3};
+    GLuint VAO = LoadVAO(vertices, 3, indices, 3, attrSizes, 2);
 
 
     // Render loop
@@ -125,12 +126,9 @@ int main()
 
         // Rendering
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
-        float timeValue = glfwGetTime();
-        float green = (sin(timeValue) / 2.0f) + 0.5f;
-        shader.setFloat4("color", 0.0f, green, 0.0f, 1.0f);
         shader.use();
 
-        glBindVertexArray(VAO_1);
+        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);  // Unbinding
 
