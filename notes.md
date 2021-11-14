@@ -12,3 +12,5 @@ OpenGL has certain objects which can be stored in the GPU and referenced via ID
 Using an EBO requires using `glDrawElements` instead of `glDrawArrays`.
 
 OpenGL core is a stricter version of the language. For example, it requires VAOs to be used.
+
+Minimum of 16 texture units available. Can be accessed with `GL_TEXTURE8` or `GL_TEXTURE0 + 8`.
