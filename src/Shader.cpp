@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
 
@@ -120,4 +121,11 @@ void Shader::setFloat4(const std::string& name, float x, float y, float z, float
 {
 	GLuint location = getLocation(name);
 	glUniform4f(location, x, y, z, w);
+}
+
+void Shader::setMat4(const std::string& name, glm::mat4 matrix) const
+{
+	GLuint location = getLocation(name);
+	// Location, Number of Matrices, Transpose?, matrices
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }

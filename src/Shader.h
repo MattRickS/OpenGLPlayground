@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 std::string LoadFile(const char* filename);
 GLuint CompileShader(const char* source, GLenum shaderType);
@@ -20,6 +21,7 @@ public:
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
 	void setFloat4(const std::string& name, float x, float y, float z, float w) const;
+	void setMat4(const std::string& name, glm::mat4 matrix) const;
 private:
 	GLuint getLocation(const std::string& name) const;
 };
