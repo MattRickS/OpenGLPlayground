@@ -101,20 +101,27 @@ int main()
     );
 
     // Prepare Objects
-    float vertices[] = {
+    float vertices_1[] = {
          0.5f,  0.4f, 0.0f,
          0.5f, -0.5f, 0.0f,
         -0.4f, -0.5f, 0.0f,
+    };
+    unsigned int indices_1[] = {
+        0, 1, 2,
+    };
+    size_t attrSizes_1[] = {3};
+    GLuint VAO_1 = LoadVAO(vertices_1, 6, indices_1, 6, attrSizes_1, 1);
+
+    float vertices_2[] = {
         -0.5f, -0.4f, 0.0f,
         -0.5f,  0.5f, 0.0f,
          0.4f,  0.5f, 0.0f,
     };
-    unsigned int indices[] = {
+    unsigned int indices_2[] = {
         0, 1, 2,
-        3, 4, 5,
     };
-    size_t attrSizes[] = {3};
-    GLuint VAO = LoadVAO(vertices, 6, indices, 6, attrSizes, 1);
+    size_t attrSizes_2[] = {3};
+    GLuint VAO_2 = LoadVAO(vertices_2, 6, indices_2, 6, attrSizes_2, 1);
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -128,8 +135,10 @@ int main()
         // Rendering
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
         simpleShader.use();
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(VAO_1);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(VAO_2);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);  // Unbinding
 
         glfwSwapBuffers(window);
