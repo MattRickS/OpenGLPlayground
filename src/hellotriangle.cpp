@@ -18,6 +18,48 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 }
 
+GLuint LoadVAO(
+	float* vertexData,
+	size_t numVertices,
+	unsigned int* indices,
+	size_t numIndices,
+    size_t* attrSizes,
+    size_t numAttrs
+)
+{
+	int numValuesPerVertex = 0;
+    for (int i =0; i < numAttrs; i++)
+        numValuesPerVertex += attrSizes[i];
+
+	GLuint VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, numValuesPerVertex * sizeof(float) * numVertices, vertexData, GL_STATIC_DRAW);
+
+    int offset = 0;
+    for (int i =0; i < numAttrs; i++)
+    {
+        glVertexAttribPointer(i, attrSizes[i], GL_FLOAT, GL_FALSE, numValuesPerVertex * sizeof(float), (void*)(offset * sizeof(float)));
+        glEnableVertexAttribArray(i);
+        offset += attrSizes[i];
+    }
+
+	GLuint EBO;
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numIndices, indices, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	return VAO;
+}
+
 int main()
 {
     glfwInit();
@@ -50,7 +92,6 @@ int main()
     }
 
     // Register callbacks
-    // glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Shaders
@@ -59,34 +100,35 @@ int main()
         "src/shaders/SimpleFragmentShader.glsl"
     );
 
-    // Prepare Scene
+    // Prepare Objects
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
+         0.5f,  0.5f, 0.0f,
          0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f,
     };
-    unsigned int VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3,
+    };
+    size_t attrSizes[] = {3};
+    GLuint VAO = LoadVAO(vertices, 4, indices, 6, attrSizes, 1);
 
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
+        // Background
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // Rendering
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
         simpleShader.use();
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);  // Unbinding
 
         glfwSwapBuffers(window);
         glfwPollEvents();
