@@ -147,18 +147,27 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
 
     // Textures
-    stbi_set_flip_vertically_on_load(true);
-    Texture texture1 = Texture("src/textures/woodenContainer.jpg", GL_RGB);
-    Texture texture2 = Texture("src/textures/awesomeface.png", GL_RGBA);
+    // stbi_set_flip_vertically_on_load(true);
+    // Texture texture1 = Texture("src/textures/woodenContainer.jpg", GL_RGB);
+    // Texture texture2 = Texture("src/textures/awesomeface.png", GL_RGBA);
 
     // Shaders
-    Shader shader = Shader(
-        "src/shaders/ColorVertexShader.glsl",
-        "src/shaders/ColorFragmentShader.glsl"
+    Shader cubeShader = Shader(
+        "src/shaders/SimpleVertexShader.glsl",
+        "src/shaders/LitFragmentShader.glsl"
     );
-    shader.use();
-    shader.setInt("texture1", 0);
-    shader.setInt("texture2", 1);
+    cubeShader.use();
+    cubeShader.setFloat3("objectColor", 1.0f, 0.5f, 0.31f);
+    cubeShader.setFloat3("lightColor",  1.0f, 1.0f, 1.0f);
+    // cubeShader.setInt("texture1", 0);
+    // cubeShader.setInt("texture2", 1);
+
+    Shader lightShader = Shader(
+        "src/shaders/SimpleVertexShader.glsl",
+        "src/shaders/LightFragmentShader.glsl"
+    );
+    lightShader.use();
+    lightShader.setFloat3("lightColor",  1.0f, 1.0f, 1.0f);
 
     // Prepare Objects
     float vertices[] = {
@@ -194,23 +203,16 @@ int main()
         5, 1, 0,
     };
     size_t attrSizes[] = {3, 2};
-    GLuint VAO = LoadVAO(vertices, 8, indices, 36, attrSizes, 2);
-
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f), 
-        glm::vec3( 2.0f,  5.0f, -15.0f), 
-        glm::vec3(-1.5f, -2.2f, -2.5f),  
-        glm::vec3(-3.8f, -2.0f, -12.3f),  
-        glm::vec3( 2.4f, -0.4f, -3.5f),  
-        glm::vec3(-1.7f,  3.0f, -7.5f),  
-        glm::vec3( 1.3f, -2.0f, -2.5f),  
-        glm::vec3( 1.5f,  2.0f, -2.5f), 
-        glm::vec3( 1.5f,  0.2f, -1.5f), 
-        glm::vec3(-1.3f,  1.0f, -1.5f)  
-    };
+    GLuint cubeVAO = LoadVAO(vertices, 8, indices, 36, attrSizes, 2);
+    GLuint lightVAO = LoadVAO(vertices, 8, indices, 36, attrSizes, 2);
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
     // Matrices
-    glm::mat4 projection;
+    glm::mat4 projection, lightModel, view;
+    lightModel = glm::mat4(1.0f);
+    lightModel = glm::translate(lightModel, lightPos);
+    lightModel = glm::scale(lightModel, glm::vec3(0.2f));
+    glm::mat4 cubeModel = glm::mat4(1.0f);
 
     // Options
     glEnable(GL_DEPTH_TEST);
@@ -222,29 +224,31 @@ int main()
         processInput(window);
 
         // Background
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Rendering
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
-        texture1.activate(GL_TEXTURE0);
-        texture2.activate(GL_TEXTURE1);
-        shader.use();
+        // texture1.activate(GL_TEXTURE0);
+        // texture2.activate(GL_TEXTURE1);
 
-        shader.setMat4("view", mainCamera.GetViewMatrix());
+        view = mainCamera.GetViewMatrix();
         projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
-        shader.setMat4("projection", projection);
 
-        glBindVertexArray(VAO);
-        for (int i = 0; i < 10; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            shader.setMat4("model", model);
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        }
+        glBindVertexArray(cubeVAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        cubeShader.use();
+        cubeShader.setMat4("model", cubeModel);
+        cubeShader.setMat4("view", view);
+        cubeShader.setMat4("projection", projection);
+
+        glBindVertexArray(lightVAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        lightShader.use();
+        lightShader.setMat4("model", lightModel);
+        lightShader.setMat4("view", view);
+        lightShader.setMat4("projection", projection);
+
         glBindVertexArray(0);  // Unbinding
 
         glfwSwapBuffers(window);
