@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <assimp/scene.h>
 
 #include <iostream>
 #include <math.h>
@@ -12,6 +13,7 @@
 #include <mygl/Shader.h>
 #include <mygl/Texture.hpp>
 #include <mygl/Camera.hpp>
+#include <mygl/Model.h>
 
 
 int windowWidth = 800;
@@ -152,15 +154,11 @@ int main()
     // Texture texture2 = Texture("src/textures/awesomeface.png", GL_RGBA);
 
     // Shaders
-    Shader cubeShader = Shader(
+    Shader basicShader = Shader(
         "src/shaders/SimpleVertexShader.glsl",
-        "src/shaders/LitFragmentShader.glsl"
+        "src/shaders/BasicFragmentShader.glsl"
     );
-    cubeShader.use();
-    cubeShader.setFloat3("objectColor", 1.0f, 0.5f, 0.31f);
-    cubeShader.setFloat3("lightColor",  1.0f, 1.0f, 1.0f);
-    // cubeShader.setInt("texture1", 0);
-    // cubeShader.setInt("texture2", 1);
+    basicShader.use();
 
     Shader lightShader = Shader(
         "src/shaders/SimpleVertexShader.glsl",
@@ -170,6 +168,8 @@ int main()
     lightShader.setFloat3("lightColor",  1.0f, 1.0f, 1.0f);
 
     // Prepare Objects
+    // Model backpack("../resources/models/backpack/backpack.obj");
+    Model backpack("/home/mshaw/git/opengl/resources/models/backpack/backpack.obj");
     float vertices[] = {
          // positions          // texture coords
          0.5f,  0.5f,  0.5f,   1.0f, 1.0f,   // top right (front)
@@ -236,18 +236,20 @@ int main()
         projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
 
         glBindVertexArray(cubeVAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        cubeShader.use();
-        cubeShader.setMat4("model", cubeModel);
-        cubeShader.setMat4("view", view);
-        cubeShader.setMat4("projection", projection);
+        basicShader.use();
+        basicShader.setMat4("model", cubeModel);
+        basicShader.setMat4("view", view);
+        basicShader.setMat4("projection", projection);
+        // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+        backpack.Draw(basicShader);
 
         glBindVertexArray(lightVAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         lightShader.use();
         lightShader.setMat4("model", lightModel);
         lightShader.setMat4("view", view);
         lightShader.setMat4("projection", projection);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);  // Unbinding
 
