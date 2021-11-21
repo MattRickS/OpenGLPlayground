@@ -70,6 +70,10 @@ void processInput(GLFWwindow *window)
         mainCamera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         mainCamera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        mainCamera.ProcessKeyboard(Camera_Movement::DOWN, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        mainCamera.ProcessKeyboard(Camera_Movement::UP, deltaTime);
 }
 
 GLuint LoadVAO(
