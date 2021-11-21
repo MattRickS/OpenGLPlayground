@@ -105,7 +105,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
         
         loadMaterialTextures(textures, material, aiTextureType_DIFFUSE, TextureType::diffuse);
-        // loadMaterialTextures(textures, material, aiTextureType_SPECULAR, TextureType::specular);
+        loadMaterialTextures(textures, material, aiTextureType_SPECULAR, TextureType::specular);
     }
 
     return Mesh(vertices, indices, textures);

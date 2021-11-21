@@ -14,6 +14,7 @@
 #include <mygl/Texture.hpp>
 #include <mygl/Camera.hpp>
 #include <mygl/Model.h>
+#include <mygl/Lights.h>
 
 
 int windowWidth = 800;
@@ -152,6 +153,42 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
+    // Lights
+    std::vector<PointLight> pointLights = std::vector<PointLight> {
+        {
+            glm::vec3(0.7f, 0.2f, 2.0f),
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.05f),
+            glm::vec3(0.8f),
+            glm::vec3(1.0f)
+        },
+        {
+            glm::vec3(2.3f, -3.3f, -4.0f),
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.05f),
+            glm::vec3(0.8f),
+            glm::vec3(1.0f)
+        },
+    };
+    DirLight dirLight { glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.05f), glm::vec3(0.4f), glm::vec3(0.5f) };
+    SpotLight spotLight
+    {
+        mainCamera.Position,
+        mainCamera.Front,
+        12.5f,
+        15.0f,
+        1.0f,
+        0.09f,
+        0.032f,
+        glm::vec3(0.0f),
+        glm::vec3(1.0f),
+        glm::vec3(1.0f)
+    };
+
     // Textures
     stbi_set_flip_vertically_on_load(true);
 
@@ -161,6 +198,11 @@ int main()
         "src/shaders/BasicFragmentShader.glsl"
     );
     basicShader.use();
+    basicShader.setFloat("material.shininess", 32.0f);
+    basicShader.setDirLight("dirLight", dirLight);
+    basicShader.setSpotLight("spotLight", spotLight);
+    for (int i = 0; i < pointLights.size(); i++)
+        basicShader.setPointLight("pointLights", pointLights[i], i);
 
     // Prepare Objects
     Model backpack("/home/mshaw/git/opengl/resources/models/backpack/backpack.obj");
@@ -188,6 +230,10 @@ int main()
 
         view = mainCamera.GetViewMatrix();
         basicShader.use();
+        spotLight.position = mainCamera.Position;
+        spotLight.direction = mainCamera.Front;
+        basicShader.setSpotLight("spotLight", spotLight);
+        basicShader.setVec3("viewPos", mainCamera.Position);
         basicShader.setMat4("model", model);
         basicShader.setMat4("view", view);
         basicShader.setMat4("projection", projection);

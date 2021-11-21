@@ -24,9 +24,9 @@ void Mesh::Draw(Shader &shader)
         std::string name;
         TextureType texureType = textures[i].type;
         if (texureType == TextureType::diffuse)
-            name = "texture_diffuse" + std::to_string(diffuseNum++);
+            name = "material.diffuse" + std::to_string(diffuseNum++);
         else if (texureType == TextureType::specular)
-            name = "texture_specular" + std::to_string(specularNum++);
+            name = "material.specular" + std::to_string(specularNum++);
         else
             throw "Unknown texture type";
         

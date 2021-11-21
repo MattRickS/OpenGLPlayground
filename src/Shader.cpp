@@ -123,6 +123,12 @@ void Shader::setFloat3(const std::string& name, float x, float y, float z) const
 	glUniform3f(location, x, y, z);
 }
 
+void Shader::setVec3(const std::string& name, glm::vec3 vec) const
+{
+	GLuint location = getLocation(name);
+	glUniform3f(location, vec.x, vec.y, vec.z);
+}
+
 void Shader::setFloat4(const std::string& name, float x, float y, float z, float w) const
 {
 	GLuint location = getLocation(name);
@@ -134,4 +140,49 @@ void Shader::setMat4(const std::string& name, glm::mat4 matrix) const
 	GLuint location = getLocation(name);
 	// Location, Number of Matrices, Transpose?, matrices
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::setPointLight(const std::string& name, PointLight light) const
+{
+	setVec3(name + ".position", light.position);
+	setVec3(name + ".ambient", light.ambient);
+	setVec3(name + ".diffuse", light.diffuse);
+	setVec3(name + ".specular", light.specular);
+	setFloat(name + ".constant", light.constant);
+	setFloat(name + ".linear", light.linear);
+	setFloat(name + ".quadratic", light.quadratic);
+}
+void Shader::setPointLight(const std::string& name, PointLight light, unsigned int index) const
+{
+	setPointLight(name + "[" + std::to_string(index) + "]", light);
+}
+
+void Shader::setSpotLight(const std::string& name, SpotLight light) const
+{
+	setVec3(name + ".position", light.position);
+	setVec3(name + ".direction", light.direction);
+	setVec3(name + ".ambient", light.ambient);
+	setVec3(name + ".diffuse", light.diffuse);
+	setVec3(name + ".specular", light.specular);
+	setFloat(name + ".constant", light.constant);
+	setFloat(name + ".linear", light.linear);
+	setFloat(name + ".quadratic", light.quadratic);
+	setFloat(name + ".cutOff", glm::cos(glm::radians(light.cutOff)));
+	setFloat(name + ".outerCutOff", glm::cos(glm::radians(light.outerCutOff)));
+}
+void Shader::setSpotLight(const std::string& name, SpotLight light, unsigned int index) const
+{
+	setSpotLight(name + "[" + std::to_string(index) + "]", light);
+}
+
+void Shader::setDirLight(const std::string& name, DirLight light) const
+{
+	setVec3(name + ".direction", light.direction);
+	setVec3(name + ".ambient", light.ambient);
+	setVec3(name + ".diffuse", light.diffuse);
+	setVec3(name + ".specular", light.specular);
+}
+void Shader::setDirLight(const std::string& name, DirLight light, unsigned int index) const
+{
+	setDirLight(name + "[" + std::to_string(index) + "]", light);
 }
