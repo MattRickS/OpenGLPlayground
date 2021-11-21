@@ -9,9 +9,9 @@
 #include <thread>
 #include <chrono>
 
-#include "Shader.h"
-#include "Texture.hpp"
-#include "Camera.hpp"
+#include <mygl/Shader.h>
+#include <mygl/Texture.hpp>
+#include <mygl/Camera.hpp>
 
 
 int windowWidth = 800;

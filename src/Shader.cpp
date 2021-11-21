@@ -5,7 +5,7 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.h"
+#include <mygl/Shader.h>
 
 std::string LoadFile(const char* filename)
 {
