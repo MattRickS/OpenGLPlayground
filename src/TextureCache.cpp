@@ -5,7 +5,7 @@
 
 bool TextureCache::HasTexture(const std::string path)
 {
-    return loadedTextures->find(path) == loadedTextures->end();
+    return loadedTextures->find(path) != loadedTextures->end();
 }
 
 void TextureCache::LoadTexture(const std::string path)

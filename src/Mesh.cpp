@@ -30,7 +30,7 @@ void Mesh::Draw(Shader &shader)
         else
             throw "Unknown texture type";
         
-        shader.setFloat(("material." + name).c_str(), i);
+        shader.setFloat(name.c_str(), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].texture.ID);
     }
     glActiveTexture(GL_TEXTURE0);
