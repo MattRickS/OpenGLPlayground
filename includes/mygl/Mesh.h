@@ -33,6 +33,7 @@ public:
     std::vector<unsigned int> indices;
     std::vector<TextureID> textures;
 
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureID> textures);
     void Draw(Shader &shader);
 

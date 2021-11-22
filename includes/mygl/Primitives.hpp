@@ -1,6 +1,23 @@
 #include <mygl/Mesh.h>
 
 
+class Quad : public Mesh
+{
+public:
+    Quad(std::vector<TextureID> textures) :
+        Mesh(std::vector<Vertex>{
+            {{-0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+            {{ 0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+            {{ 0.5f,  0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+            {{-0.5f,  0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+        }, std::vector<unsigned int> {
+            0, 1, 2,
+            2, 3, 0,
+        }, textures) {}
+    Quad() : Quad(std::vector<TextureID>()) {}
+};
+
+
 class Cube : public Mesh
 {
 public:
