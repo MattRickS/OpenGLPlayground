@@ -15,6 +15,7 @@
 #include <mygl/Camera.hpp>
 #include <mygl/Model.h>
 #include <mygl/Lights.h>
+#include <mygl/Primitives.hpp>
 
 
 int windowWidth = 800;
@@ -193,6 +194,11 @@ int main()
     stbi_set_flip_vertically_on_load(true);
 
     // Shaders
+    Shader colorShader = Shader(
+        "src/shaders/SimpleVertexShader.glsl",
+        "src/shaders/SimpleFragmentShader.glsl"
+    );
+
     Shader basicShader = Shader(
         "src/shaders/BasicVertexShader.glsl",
         "src/shaders/BasicFragmentShader.glsl"
@@ -206,11 +212,13 @@ int main()
 
     // Prepare Objects
     Model backpack("/home/mshaw/git/opengl/resources/models/backpack/backpack.obj");
+    Cube cube;
 
     // Matrices
     glm::mat4 view;
     glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
     glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 cubeModel = glm::translate(model, glm::vec3(0.0f, 4.0f, 0.0f));
 
     // Options
     glEnable(GL_DEPTH_TEST);
@@ -239,6 +247,13 @@ int main()
         basicShader.setMat4("projection", projection);
 
         backpack.Draw(basicShader);
+
+        colorShader.use();
+        colorShader.setMat4("model", cubeModel);
+        colorShader.setMat4("view", view);
+        colorShader.setMat4("projection", projection);
+
+        cube.Draw(colorShader);
 
         glBindVertexArray(0);  // Unbinding
 
