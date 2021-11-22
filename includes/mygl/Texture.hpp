@@ -33,6 +33,7 @@ public:
             glGenerateMipmap(GL_TEXTURE_2D);
 
             // set the texture wrapping parameters
+            // TODO: Might want different modes, eg, GL_CLAMP_TO_EDGE
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 

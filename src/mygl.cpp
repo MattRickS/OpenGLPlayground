@@ -17,10 +17,11 @@
 #include <mygl/Lights.h>
 #include <mygl/Primitives.hpp>
 #include <mygl/TextureCache.hpp>
+#include <mygl/Buffers.hpp>
 
 
-int windowWidth = 800;
-int windowHeight = 600;
+unsigned int windowWidth = 800;
+unsigned int windowHeight = 600;
 
 bool firstMouse = true;
 float lastMouseX, lastMouseY;
@@ -200,26 +201,23 @@ int main()
     };
 
     // Shaders
+    Shader screenShader = Shader(
+        "src/shaders/ScreenVertexShader.glsl",
+        "src/shaders/ScreenFragmentShader.glsl"
+    );
     Shader texturedShader = Shader(
         "src/shaders/BasicVertexShader.glsl",
         "src/shaders/TexturedFragmentShader.glsl"
     );
-    texturedShader.use();
-
     Shader basicShader = Shader(
         "src/shaders/BasicVertexShader.glsl",
         "src/shaders/BasicFragmentShader.glsl"
     );
-    basicShader.use();
-    basicShader.setFloat("material.shininess", 32.0f);
-    basicShader.setDirLight("dirLight", dirLight);
-    basicShader.setSpotLight("spotLight", spotLight);
-    for (int i = 0; i < pointLights.size(); i++)
-        basicShader.setPointLight("pointLights", pointLights[i], i);
 
     // Prepare Objects
     Model backpack("/home/mshaw/git/opengl/resources/models/backpack/backpack.obj");
     Cube cube { std::vector<TextureID> {woodenContainerDiffuse} };
+    Quad quad;
 
     // Matrices
     glm::mat4 view;
@@ -228,16 +226,35 @@ int main()
     glm::mat4 cubeModel = glm::translate(model, glm::vec3(4.0f, 4.0f, 4.0f));
 
     // Options
-    glEnable(GL_DEPTH_TEST);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // Shader config
+    screenShader.use();
+    screenShader.setInt("screenTexture", 0);
+
+    basicShader.use();
+    basicShader.setFloat("material.shininess", 32.0f);
+    basicShader.setDirLight("dirLight", dirLight);
+    basicShader.setSpotLight("spotLight", spotLight);
+    for (int i = 0; i < pointLights.size(); i++)
+        basicShader.setPointLight("pointLights", pointLights[i], i);
+
+    // Buffers
+    FrameBuffer framebuffer;
+    framebuffer.use();
+    TextureBuffer textureBuffer {windowWidth, windowHeight};
+    RenderBuffer renderBuffer {windowWidth, windowHeight};
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
-        // Background
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        // Setup Render Buffer
+        framebuffer.use();
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Rendering
@@ -263,6 +280,17 @@ int main()
         texturedShader.setMat4("projection", projection);
 
         cube.Draw(texturedShader);
+
+        // Setup Texture Buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Render to Texture
+        screenShader.use();
+        textureBuffer.use();
+        quad.Draw(screenShader);
 
         glBindVertexArray(0);  // Unbinding
 
