@@ -16,6 +16,7 @@
 #include <mygl/Model.h>
 #include <mygl/Lights.h>
 #include <mygl/Primitives.hpp>
+#include <mygl/TextureCache.hpp>
 
 
 int windowWidth = 800;
@@ -192,12 +193,18 @@ int main()
 
     // Textures
     stbi_set_flip_vertically_on_load(true);
+    TextureCache &textureCache = TextureCache::getInstance();
+    textureCache.LoadTexture("resources/textures/woodenContainer.jpg");
+    TextureID woodenContainerDiffuse = TextureID {
+        textureCache.GetTexture("resources/textures/woodenContainer.jpg"), TextureType::diffuse
+    };
 
     // Shaders
-    Shader colorShader = Shader(
-        "src/shaders/SimpleVertexShader.glsl",
-        "src/shaders/SimpleFragmentShader.glsl"
+    Shader texturedShader = Shader(
+        "src/shaders/BasicVertexShader.glsl",
+        "src/shaders/TexturedFragmentShader.glsl"
     );
+    texturedShader.use();
 
     Shader basicShader = Shader(
         "src/shaders/BasicVertexShader.glsl",
@@ -212,13 +219,13 @@ int main()
 
     // Prepare Objects
     Model backpack("/home/mshaw/git/opengl/resources/models/backpack/backpack.obj");
-    Cube cube;
+    Cube cube { std::vector<TextureID> {woodenContainerDiffuse} };
 
     // Matrices
     glm::mat4 view;
     glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 cubeModel = glm::translate(model, glm::vec3(0.0f, 4.0f, 0.0f));
+    glm::mat4 cubeModel = glm::translate(model, glm::vec3(4.0f, 4.0f, 4.0f));
 
     // Options
     glEnable(GL_DEPTH_TEST);
@@ -236,6 +243,7 @@ int main()
         // Rendering
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
 
+        // Draw Backpack
         view = mainCamera.GetViewMatrix();
         basicShader.use();
         spotLight.position = mainCamera.Position;
@@ -248,12 +256,13 @@ int main()
 
         backpack.Draw(basicShader);
 
-        colorShader.use();
-        colorShader.setMat4("model", cubeModel);
-        colorShader.setMat4("view", view);
-        colorShader.setMat4("projection", projection);
+        // Draw Cube
+        texturedShader.use();
+        texturedShader.setMat4("model", cubeModel);
+        texturedShader.setMat4("view", view);
+        texturedShader.setMat4("projection", projection);
 
-        cube.Draw(colorShader);
+        cube.Draw(texturedShader);
 
         glBindVertexArray(0);  // Unbinding
 
