@@ -28,6 +28,8 @@ float lastMouseX, lastMouseY;
 float deltaTime, lastFrame = 0.0f;
 Camera mainCamera = Camera();
 
+bool isWireframe = false;
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -57,15 +59,22 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     mainCamera.ProcessMouseScroll(yoffset);
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        auto mode = isWireframe ? GL_FILL : GL_LINE;
+        glPolygonMode(GL_FRONT_AND_BACK, mode);
+        isWireframe = !isWireframe;
+    }
+
+}
+
 
 void processInput(GLFWwindow *window)
 {
-    float currentFrame = glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
-
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         mainCamera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -155,6 +164,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     // Lights
     std::vector<PointLight> pointLights = std::vector<PointLight> {
@@ -249,6 +259,10 @@ int main()
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         processInput(window);
 
         // Setup Render Buffer
@@ -256,9 +270,6 @@ int main()
         glEnable(GL_DEPTH_TEST);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Rendering
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe
 
         // Draw Backpack
         view = mainCamera.GetViewMatrix();
